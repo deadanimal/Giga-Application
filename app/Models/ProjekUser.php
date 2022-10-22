@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Projek extends Model
+class ProjekUser extends Model
 {
     use HasFactory;
 
-    public function users()
+    public function projek()
     {
-        return $this->hasMany(ProjekUser::class);
-    }       
+        return $this->belongsTo(Projek::class);
+    }      
 }
