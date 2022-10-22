@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 use App\Models\FgvPmps\Rosak;
 use App\Models\FgvPmps\Tugasan;
-
 use App\Models\User;
 
 class FgvPmpsController extends Controller
@@ -38,17 +37,17 @@ class FgvPmpsController extends Controller
         $id = (int)$request->route('id');
         $tugasan = Tugasan::find($id);
 
-        $tugasan->gambar = $request->file('upload')->store('fgv-pmps/uploads');
+        $tugasan->gambar = $request->file('gambar')->store('giga/fgv-pmps/gambars');
 
-        if ($request->jenis == 'balut') {
+        if ($tugasan->jenis == 'balut') {
             $tugasan->catatan_pekerja_balut = $request->catatan_pekerja_balut;
             $tugasan->status = 'balut-berjaya';
  
 
-        } else if ($request->jenis == 'debung') {
+        } else if ($tugasan->jenis == 'debung') {
             $tugasan->catatan_pekerja_debung = $request->catatan_pekerja_debung;
             
-            if ($request->berjaya == 'ya') {
+            if ($tugasan->berjaya == 'ya') {
                 $tugasan->status = 'debung-berjaya';
                 $tugasan->no_debung = $request->no_debung;
                 $tugasan->peratus_debung = $request->peratus_debung;
@@ -56,24 +55,19 @@ class FgvPmpsController extends Controller
                 $tugasan->status = 'debung-tidak-berjaya';
             }
 
-        } else if ($request->jenis == 'kawalan') {
+        } else if ($tugasan->jenis == 'kawalan') {
             $tugasan->catatan_pekerja_kawalan = $request->catatan_pekerja_kawalan;
+
             $tugasan->jenis_rosak = $request->jenis_rosak;
             $tugasan->catatan_rosak = $request->catatan_rosak;
             $tugasan->status = 'kawalan-berjaya';
 
-        } else if ($request->jenis == 'tuai') {
+        } else if ($tugasan->jenis == 'tuai') {
             $tugasan->catatan_pekerja_tuai = $request->catatan_pekerja_tuai;
+
             $tugasan->berat_tandan = $request->berat_tandan;
             $tugasan->status = 'tuai-berjaya';
-        } else if ($request->jenis == 'sedia-pollen') {
-            $tugasan->catatan_pekerja_sedia_pollen = $request->catatan_pekerja_sedia_pollen;
-            $tugasan->berat_tandan = $request->berat_tandan;
-            $tugasan->status = 'sedia-pollen-berjaya';
-        } else if ($request->jenis == 'guna-pollen') {
-            $tugasan->catatan_pekerja_guna_pollen = $request->catatan_pekerja_guna_pollen;
-            $tugasan->berat_tandan = $request->berat_tandan;
-            $tugasan->status = 'guna-pollen-berjaya';
+
         }
 
         $tugasan->tarikhmasa = $request->tarikhmasa;
@@ -89,16 +83,16 @@ class FgvPmpsController extends Controller
         $id = (int)$request->route('id');
         $tugasan = Tugasan::find($id);
 
-        if ($request->jenis == 'balut') {
+        if ($tugasan->jenis == 'balut') {
             $tugasan->catatan_supervisor_balut = $request->catatan_supervisor_balut;
             $tugasan->status = 'balut-sah';
-        } else if ($request->jenis == 'debung') {
+        } else if ($tugasan->jenis == 'debung') {
             $tugasan->catatan_supervisor_debung = $request->catatan_supervisor_debung;
             $tugasan->status = 'debung-sah';
-        } else if ($request->jenis == 'kawalan') {
+        } else if ($tugasan->jenis == 'kawalan') {
             $tugasan->catatan_supervisor_kawalan = $request->catatan_supervisor_kawalan;
             $tugasan->status = 'kawalan-sah';
-        } else if ($request->jenis == 'tuai') {
+        } else if ($tugasan->jenis == 'tuai') {
             $tugasan->catatan_supervisor_tuai = $request->catatan_supervisor_tuai;
             $tugasan->status = 'tuai-sah';
         }
@@ -106,7 +100,16 @@ class FgvPmpsController extends Controller
         return $tugasan->toJson();
     }
 
-
+    public function lapor_rosak(Request $request)
+    {
+        $user = $request->user();
+        $rosak = new Rosak;
+        $rosak->gambar = $request->file('gambar')->store('giga/fgv-pmps/gambars');
+        $rosak->catatan = $request->catatan;
+        $rosak->user_id = $user->id;
+        $rosak->save();
+        return $rosak->toJson(JSON_PRETTY_PRINT);
+    }
 
     public function profil(Request $request)
     {
