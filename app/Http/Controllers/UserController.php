@@ -16,21 +16,6 @@ class UserController extends Controller
         return view('home');
     }
 
-    /**
-     * Login
-     *
-     * Check that the service is up. If everything is okay, you'll get a 200 OK response.
-     *
-     * Otherwise, the request will fail with a 400 error, and a response listing the failed services.
-     *
-     * @bodyParam user_id int required The id of the user. Example: 9
-     * @bodyParam room_id string The id of the room.
-     * @bodyParam forever boolean Whether to ban the user forever. Example: false
-     * @bodyParam another_one number This won't be added to the examples. No-example* 
-     * @response 400 scenario="Service is unhealthy" {"status": "down", "services": {"database": "up", "redis": "down"}}
-     * @responseField status The status of this API (`up` or `down`).
-     * @responseField services Map of each downstream service and their status (`up` or `down`).
-     */
     public function login(Request $request)
     {
         try {

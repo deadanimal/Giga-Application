@@ -2,85 +2,115 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreFgvPmpsRequest;
-use App\Http\Requests\UpdateFgvPmpsRequest;
-use App\Models\FgvPmps;
+use Illuminate\Http\Request;
+
+use App\Models\FgvPmps\Rosak;
+use App\Models\FgvPmps\Tugasan;
+
+use App\Models\User;
 
 class FgvPmpsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function senarai_tugasan()
     {
-        //
+        $tugasans = Tugasan::all();
+        return $tugasans->toJson(JSON_PRETTY_PRINT);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function cipta_tugasan(Request $request)
     {
-        //
+        $user = $request->user();
+
+        $tugasan = new Tugasan;
+        $tugasan->pokok_id = $request->pokok_id;
+        $tugasan->tandan_id = $request->tandan_id;
+        $tugasan->pekerja_id = $request->pekerja_id;
+        $tugasan->jenis = $request->jenis;
+        $tugasan->status = 'mula';
+        $tugasan->supervisor_id = $user->id;
+        $tugasan->save();
+
+        return $tugasan->toJson(JSON_PRETTY_PRINT);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreFgvPmpsRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreFgvPmpsRequest $request)
+    public function siap_tugas(Request $request)
     {
-        //
+        $id = (int)$request->route('id');
+        $tugasan = Tugasan::find($id);
+
+        $tugasan->gambar = $request->file('upload')->store('fgv-pmps/uploads');
+
+        if ($request->jenis == 'balut') {
+            $tugasan->catatan_pekerja_balut = $request->catatan_pekerja_balut;
+            $tugasan->status = 'balut-berjaya';
+ 
+
+        } else if ($request->jenis == 'debung') {
+            $tugasan->catatan_pekerja_debung = $request->catatan_pekerja_debung;
+            
+            if ($request->berjaya == 'ya') {
+                $tugasan->status = 'debung-berjaya';
+                $tugasan->no_debung = $request->no_debung;
+                $tugasan->peratus_debung = $request->peratus_debung;
+            } else {
+                $tugasan->status = 'debung-tidak-berjaya';
+            }
+
+        } else if ($request->jenis == 'kawalan') {
+            $tugasan->catatan_pekerja_kawalan = $request->catatan_pekerja_kawalan;
+            $tugasan->jenis_rosak = $request->jenis_rosak;
+            $tugasan->catatan_rosak = $request->catatan_rosak;
+            $tugasan->status = 'kawalan-berjaya';
+
+        } else if ($request->jenis == 'tuai') {
+            $tugasan->catatan_pekerja_tuai = $request->catatan_pekerja_tuai;
+            $tugasan->berat_tandan = $request->berat_tandan;
+            $tugasan->status = 'tuai-berjaya';
+        } else if ($request->jenis == 'sedia-pollen') {
+            $tugasan->catatan_pekerja_sedia_pollen = $request->catatan_pekerja_sedia_pollen;
+            $tugasan->berat_tandan = $request->berat_tandan;
+            $tugasan->status = 'sedia-pollen-berjaya';
+        } else if ($request->jenis == 'guna-pollen') {
+            $tugasan->catatan_pekerja_guna_pollen = $request->catatan_pekerja_guna_pollen;
+            $tugasan->berat_tandan = $request->berat_tandan;
+            $tugasan->status = 'guna-pollen-berjaya';
+        }
+
+        $tugasan->tarikhmasa = $request->tarikhmasa;
+        $tugasan->latitude = $request->latitude;
+        $tugasan->longitude = $request->longitude;
+
+        $tugasan->save();
+        return $tugasan->toJson();
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\FgvPmps  $fgvPmps
-     * @return \Illuminate\Http\Response
-     */
-    public function show(FgvPmps $fgvPmps)
+    public function sah_tugas(Request $request)
     {
-        //
+        $id = (int)$request->route('id');
+        $tugasan = Tugasan::find($id);
+
+        if ($request->jenis == 'balut') {
+            $tugasan->catatan_supervisor_balut = $request->catatan_supervisor_balut;
+            $tugasan->status = 'balut-sah';
+        } else if ($request->jenis == 'debung') {
+            $tugasan->catatan_supervisor_debung = $request->catatan_supervisor_debung;
+            $tugasan->status = 'debung-sah';
+        } else if ($request->jenis == 'kawalan') {
+            $tugasan->catatan_supervisor_kawalan = $request->catatan_supervisor_kawalan;
+            $tugasan->status = 'kawalan-sah';
+        } else if ($request->jenis == 'tuai') {
+            $tugasan->catatan_supervisor_tuai = $request->catatan_supervisor_tuai;
+            $tugasan->status = 'tuai-sah';
+        }
+        $tugasan->save();
+        return $tugasan->toJson();
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\FgvPmps  $fgvPmps
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(FgvPmps $fgvPmps)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateFgvPmpsRequest  $request
-     * @param  \App\Models\FgvPmps  $fgvPmps
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateFgvPmpsRequest $request, FgvPmps $fgvPmps)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\FgvPmps  $fgvPmps
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(FgvPmps $fgvPmps)
+    public function profil(Request $request)
     {
-        //
+        $user = $request->user();
+        return $user->toJson(JSON_PRETTY_PRINT);
     }
 }
